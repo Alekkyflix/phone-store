@@ -5,6 +5,7 @@ import {
   CheckCircle, 
   AlertCircle 
 } from "lucide-react";
+import { getWebhookUrl } from "../../utils/config";
 
 /**
  * SaleForm Component
@@ -75,9 +76,9 @@ const SaleForm = ({ n8nConfig }) => {
         },
       };
 
-      const proxyUrl = n8nConfig.webhookUrl.replace('https://nairobiaicommunity.app.n8n.cloud', '/api/n8n');
+      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
       
-      const response = await fetch(proxyUrl, {
+      const response = await fetch(finalUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(saleData),

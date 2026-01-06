@@ -10,3 +10,21 @@ export const DEFAULT_CONFIG = {
   whatsappGroup: "https://chat.whatsapp.com/your-group-link",
   orderFormUrl: "https://forms.google.com/your-form-link",
 };
+
+/**
+ * Utility to get the correct webhook URL based on the environment.
+ * In development, it uses the local proxy (/api/n8n) to bypass CORS.
+ * In production, it uses the direct URL.
+ * @param {string} url - The base n8n webhook URL
+ * @returns {string} - The URL to use for fetch requests
+ */
+export const getWebhookUrl = (url) => {
+  if (!url) return "";
+  
+  // Only apply proxy in development
+  if (import.meta.env.DEV) {
+    return url.replace('https://nairobiaicommunity.app.n8n.cloud', '/api/n8n');
+  }
+  
+  return url;
+};

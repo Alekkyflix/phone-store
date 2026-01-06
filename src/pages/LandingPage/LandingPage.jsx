@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MOCK_PHONES } from '../../mockData';
 import SmartphoneIcon from '../../components/common/SmartphoneIcon';
+import { getWebhookUrl } from '../../utils/config';
 
 /**
  * LandingPage Component
@@ -85,9 +86,9 @@ const LandingPage = ({
       
       console.log('Order payload:', payload);
 
-      const proxyUrl = n8nConfig.webhookUrl.replace('https://nairobiaicommunity.app.n8n.cloud', '/api/n8n');
+      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
       
-      const response = await fetch(proxyUrl, {
+      const response = await fetch(finalUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { hashPassword } from "../../utils/crypto";
 import SmartphoneIcon from "../../components/common/SmartphoneIcon";
+import { getWebhookUrl } from "../../utils/config";
 
 /**
  * AuthPage Component
@@ -150,8 +151,10 @@ const AuthPage = ({ mode, n8nConfig, setCurrentUser, setIsAuthenticated, setCurr
           }),
         },
       };
+ 
+      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
 
-      const response = await fetch(n8nConfig.webhookUrl, {
+      const response = await fetch(finalUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(authData),

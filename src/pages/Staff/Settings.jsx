@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Zap
 } from "lucide-react";
+import { getWebhookUrl } from "../../utils/config";
 
 /**
  * Settings Component
@@ -51,10 +52,10 @@ const Settings = ({ n8nConfig, saveConfig }) => {
     setSaveStatus({ type: "info", message: "📡 Pinging n8n webhook..." });
 
     try {
-      // Use the proxy path to bypass CORS
-      const proxyUrl = localConfig.webhookUrl.replace('https://nairobiaicommunity.app.n8n.cloud', '/api/n8n');
+      // Use the proxy path in dev to bypass CORS
+      const finalUrl = getWebhookUrl(localConfig.webhookUrl);
       
-      const response = await fetch(proxyUrl, {
+      const response = await fetch(finalUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "ping", timestamp: new Date().toISOString() }),
