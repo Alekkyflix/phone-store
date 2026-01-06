@@ -86,9 +86,9 @@ const AuthPage = ({ mode, n8nConfig, setCurrentUser, setIsAuthenticated, setCurr
   const handleSubmit = async () => {
     setStatus({ type: "", message: "" });
 
-    // Hardcoded flix login bypass for development/admin access
-    if (mode === 'login' && formData.email === 'flix' && formData.password === 'Test1111') {
-      const user = { email: 'flix', fullName: 'Flix Administrator', role: 'admin' };
+    // Hardcoded Admin login bypass for development/admin access
+    if (mode === 'login' && formData.email.toLowerCase() === 'admin' && formData.password === 'Test1111') {
+      const user = { email: 'admin', fullName: 'System Administrator', role: 'admin' };
       localStorage.setItem('phone-shop-auth', JSON.stringify({
         isAuthenticated: true,
         user,

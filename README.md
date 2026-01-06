@@ -36,6 +36,16 @@ A professional, gamified retail management system built with React and Vite, fea
    npm run dev
    ```
 
+## 🌐 Deployment (GitHub Pages)
+
+I've already set up one-click deployment for you. Whenever you want to update your live site:
+
+1. Run the deploy command:
+   ```bash
+   npm run deploy
+   ```
+   This will automatically build the project and push it to the `gh-pages` branch.
+
 ## ⚙️ Configuration
 
 The system is designed to be highly configurable via the **Staff Portal -> Settings**:
