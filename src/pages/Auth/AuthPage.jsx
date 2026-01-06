@@ -87,7 +87,8 @@ const AuthPage = ({ mode, n8nConfig, setCurrentUser, setIsAuthenticated, setCurr
     setStatus({ type: "", message: "" });
 
     // Hardcoded Admin login bypass for development/admin access
-    if (mode === 'login' && formData.email.toLowerCase() === 'admin' && formData.password === 'Test1111') {
+    const inputEmail = (formData.email || "").toLowerCase().trim();
+    if (mode === 'login' && inputEmail === 'admin' && formData.password === 'Test1111') {
       const user = { email: 'admin', fullName: 'System Administrator', role: 'admin' };
       localStorage.setItem('phone-shop-auth', JSON.stringify({
         isAuthenticated: true,
