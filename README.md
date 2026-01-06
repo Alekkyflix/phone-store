@@ -1,16 +1,61 @@
-# React + Vite
+# Tech Mobile - Phone Management System 📱⚡
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A professional, gamified retail management system built with React and Vite, featuring seamless n8n automation for sales tracking and inventory management.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **🛍️ Elegant Storefront**: High-performance landing page with search, filtering, and a glassmorphic cart experience.
+- **🛡️ Staff Portal**: Secure access to inventory management, sales recording, and system configurations.
+- **📊 n8n Integration**: Automated data flow to n8n webhooks for real-time sales tracking and customer WhatsApp notifications.
+- **🎮 Tech Points System**: Gamified user experience where customers earn points for browsing and purchasing.
+- **🌉 Bulletproof Proxy**: Built-in Vite proxy to handle CORS issues effortlessly during development.
 
-## React Compiler
+## 🚀 Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js (v18 or higher)
+- npm or yarn
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/PKwaringa/phone-management-sys.git
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file in the root directory:
+   ```env
+   VITE_N8N_WEBHOOK_URL=your_n8n_webhook_url
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## ⚙️ Configuration
+
+The system is designed to be highly configurable via the **Staff Portal -> Settings**:
+
+- **Webhook URL**: Directly link your n8n workflow.
+- **Shop Branding**: Update your shop name, location, and contact details.
+- **Theme Engine**: Switch between multiple premium UI themes (Emerald, Dark, Ocean, etc.).
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18
+- **Build Tool**: Vite
+- **Icons**: Lucide React
+- **Animations**: Tailwind CSS / Custom Keyframes
+- **State**: React Context & Hooks
+
+## 📝 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+Built with ❤️ by [PKwaringa](https://github.com/PKwaringa)
