@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Flame, Zap, Plus } from 'lucide-react';
+import { Star, Flame, Zap, Plus, ShoppingCart } from 'lucide-react';
 import SmartphoneIcon from '../common/SmartphoneIcon';
 
 /**
