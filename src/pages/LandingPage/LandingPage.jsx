@@ -17,7 +17,8 @@ import {
   RefreshCw,
   CreditCard,
   Wallet,
-  Banknote
+  Banknote,
+  Smartphone
 } from 'lucide-react';
 import { MOCK_PHONES } from '../../mockData';
 import SmartphoneIcon from '../../components/common/SmartphoneIcon';
@@ -95,9 +96,10 @@ const LandingPage = ({
         timestamp: new Date().toISOString(),
         phone: selectedPhone, // Single phone order context
         cartItems: cartItems.length > 0 ? cartItems : undefined,
-        customer: customerData,
-        email: customerData.email,
-        subscribeToOffers: customerData.subscribeToOffers === 'on' || customerData.subscribeToOffers === true
+        customer: {
+          ...customerData,
+          paymentMethod: paymentMethod
+        }
       };
       
       console.log('Order payload:', payload);
