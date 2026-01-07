@@ -25,7 +25,7 @@ import Settings from "./pages/Staff/Settings";
 /**
  * PhoneShopManager - Main Application Orchestrator
  * 
- * This is the root component of the application. It manages globalization state,
+ * This is the root component of the application. It manages global state,
  * including authentication, gamification, shopping cart, and system configuration.
  * It serves as a router to switch between the customer LandingPage, the AuthPage,
  * and the internal Staff Dashboard.
@@ -109,7 +109,8 @@ const PhoneShopManager = () => {
   };
 
   /**
-   * Fetches the latest inventory from n8n/Google Sheets
+   * Fetches the latest inventory from n8n/Google Sheets.
+   * Updates the global inventory state used by both LandingPage and Staff Hub.
    */
   const fetchInventory = async () => {
     try {
@@ -129,12 +130,13 @@ const PhoneShopManager = () => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch inventory:", error);
+      // Silently fail to fallback to mock data
     }
   };
 
   /**
-   * Fetches recent transaction history
+   * Fetches recent transaction history for the Staff History tab.
+   * Provides transparency into sales and inventory movements.
    */
   const fetchHistory = async () => {
     try {
@@ -155,7 +157,7 @@ const PhoneShopManager = () => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch history:", error);
+      // Fail gracefully
     } finally {
       setIsRefreshing(false);
     }

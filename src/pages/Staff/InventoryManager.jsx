@@ -13,8 +13,14 @@ import { getWebhookUrl } from "../../utils/config";
 
 /**
  * InventoryManager Component
+ * 
  * Provides tools for staff to restock items, reduce stock for sales, 
  * and register completely new phone models in the inventory system.
+ * 
+ * @param {Object} props
+ * @param {Object} props.n8nConfig - System configuration (shop name, location, webhook URL)
+ * @param {Function} props.onRefresh - Function to trigger a global inventory sync
+ * @param {boolean} props.isRefreshing - Loading state for the sync operation
  */
 const InventoryManager = ({ n8nConfig, onRefresh, isRefreshing }) => {
   const [actionType, setActionType] = useState("add_stock");
@@ -30,7 +36,8 @@ const InventoryManager = ({ n8nConfig, onRefresh, isRefreshing }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
-   * Handles inventory updates by sending data to the n8n webhook
+   * Handles inventory updates by sending data to the n8n webhook.
+   * Supports 'add_stock', 'sale' (manual reduction), and 'new_product' registration.
    */
   const handleInventoryAction = async () => {
     // Basic validation based on action type

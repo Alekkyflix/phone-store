@@ -9,7 +9,11 @@ import { getWebhookUrl } from "../../utils/config";
 
 /**
  * SaleForm Component
+ * 
  * Allows staff to record new sales and trigger customer notifications via n8n.
+ * 
+ * @param {Object} props
+ * @param {Object} props.n8nConfig - System configuration (shop name, whatsapp details, etc.)
  */
 const SaleForm = ({ n8nConfig }) => {
   const [formData, setFormData] = useState({
