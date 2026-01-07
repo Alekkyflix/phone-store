@@ -374,14 +374,6 @@ const LandingPage = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button 
-                onClick={(e) => { e.preventDefault(); onRefresh(); }}
-                disabled={isRefreshing}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-100 rounded-lg transition-colors group"
-                title="Sync Inventory"
-              >
-                <RefreshCw size={18} className={`text-slate-400 group-hover:text-blue-600 transition-all ${isRefreshing ? 'animate-spin' : ''}`} />
-              </button>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 px-2">
               {categories.map(cat => (

@@ -399,7 +399,13 @@ const PhoneShopManager = () => {
           <div className="flex-1 overflow-y-auto z-10 p-8 md:p-12 relative h-screen custom-scrollbar">
             <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
               {activeTab === "sale" && <SaleForm n8nConfig={n8nConfig} />}
-              {activeTab === "inventory" && <InventoryManager n8nConfig={n8nConfig} />}
+              {activeTab === "inventory" && (
+                <InventoryManager 
+                  n8nConfig={n8nConfig} 
+                  onRefresh={fetchInventory}
+                  isRefreshing={isRefreshing}
+                />
+              )}
               {activeTab === "offers" && <OfferBroadcast n8nConfig={n8nConfig} />}
               {activeTab === "customers" && <CustomersList n8nConfig={n8nConfig} />}
               {activeTab === "settings" && (

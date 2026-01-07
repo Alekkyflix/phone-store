@@ -6,7 +6,8 @@ import {
   Zap, 
   Loader2, 
   CheckCircle, 
-  AlertCircle 
+  AlertCircle,
+  RefreshCw
 } from "lucide-react";
 import { getWebhookUrl } from "../../utils/config";
 
@@ -15,7 +16,7 @@ import { getWebhookUrl } from "../../utils/config";
  * Provides tools for staff to restock items, reduce stock for sales, 
  * and register completely new phone models in the inventory system.
  */
-const InventoryManager = ({ n8nConfig }) => {
+const InventoryManager = ({ n8nConfig, onRefresh, isRefreshing }) => {
   const [actionType, setActionType] = useState("add_stock");
   const [formData, setFormData] = useState({
     productId: "",
@@ -98,8 +99,13 @@ const InventoryManager = ({ n8nConfig }) => {
         if (result.lowStockAlert) {
           message += `\n⚠️ LOW STOCK ALERT: Current level is below minimum!`;
         }
-
+        
         setStatus({ type: "success", message });
+        
+        // Auto-refresh the store inventory after successful addition
+        if (onRefresh) {
+          onRefresh();
+        }
         setFormData({
           productId: "",
           model: "",
@@ -235,25 +241,35 @@ const InventoryManager = ({ n8nConfig }) => {
           />
         </div>
 
-        <button
-          onClick={handleInventoryAction}
-          disabled={isSubmitting}
-          className={`w-full py-5 text-white rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-3 shadow-xl ${
-            actionType === 'add_stock' ? 'bg-emerald-600 shadow-emerald-100 hover:bg-emerald-700' :
-            actionType === 'sale' ? 'bg-rose-600 shadow-rose-100 hover:bg-rose-700' :
-            'bg-blue-600 shadow-blue-100 hover:bg-blue-700'
-          }`}
-        >
-          {isSubmitting ? (
-            <Loader2 className="animate-spin" size={24} />
-          ) : (
-            <>
-              <Zap size={20} className="fill-white" />
-              {actionType === 'add_stock' ? 'Confirm Restock' : 
-               actionType === 'sale' ? 'Confirm Reduction' : 'Register New Device'}
-            </>
-          )}
-        </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+             onClick={onRefresh}
+             disabled={isSubmitting || isRefreshing}
+             className="w-full py-5 bg-white border-2 border-slate-200 text-slate-900 rounded-2xl font-black text-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+          >
+             <RefreshCw size={20} className={`text-blue-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+             Sync Live Store
+          </button>
+          <button
+            onClick={handleInventoryAction}
+            disabled={isSubmitting}
+            className={`w-full py-5 text-white rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-3 shadow-xl ${
+              actionType === 'add_stock' ? 'bg-emerald-600 shadow-emerald-100 hover:bg-emerald-700' :
+              actionType === 'sale' ? 'bg-rose-600 shadow-rose-100 hover:bg-rose-700' :
+              'bg-blue-600 shadow-blue-100 hover:bg-blue-700'
+            }`}
+          >
+            {isSubmitting ? (
+              <Loader2 className="animate-spin" size={24} />
+            ) : (
+              <>
+                <Zap size={20} className="fill-white" />
+                {actionType === 'add_stock' ? 'Confirm Restock' : 
+                 actionType === 'sale' ? 'Confirm Reduction' : 'Register New Device'}
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {status.message && (
