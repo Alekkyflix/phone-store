@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 // Utility Imports
-import { DEFAULT_CONFIG } from "./utils/config";
+import { DEFAULT_CONFIG, getWebhookUrl } from "./utils/config";
 import { hashPassword } from "./utils/crypto";
 
 // Component Imports
@@ -64,26 +64,74 @@ const PhoneShopManager = () => {
   }, []);
 
   /**
-   * Loads saved system configuration from storage
+   * Loads system configuration.
+   * Logic: 1. Try local storage (fast) 2. Try cloud n8n (synced)
    */
   const loadConfig = async () => {
     try {
-      if (window.storage) {
-        const configData = await window.storage.get("n8n-config");
-        if (configData) setN8nConfig(JSON.parse(configData.value));
+      // Step 1: Instant load from browser memory
+      const localStored = localStorage.getItem("n8n-config") || 
+                         (window.storage ? (await window.storage.get("n8n-config"))?.value : null);
+      
+      if (localStored) {
+        setN8nConfig(JSON.parse(localStored));
+      }
+
+      // Step 2: Cloud sync (if we have a URL)
+      const currentUrl = localStored ? JSON.parse(localStored).webhookUrl : DEFAULT_CONFIG.webhookUrl;
+      
+      if (currentUrl) {
+        const finalUrl = getWebhookUrl(currentUrl);
+        const response = await fetch(finalUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "get_config", timestamp: new Date().toISOString() }),
+        });
+
+        if (response.ok) {
+          const cloudConfig = await response.json();
+          // We expect { success: true, config: { ... } }
+          if (cloudConfig && cloudConfig.success && cloudConfig.config) {
+            setN8nConfig(cloudConfig.config);
+            localStorage.setItem("n8n-config", JSON.stringify(cloudConfig.config));
+          }
+        }
       }
     } catch (error) {
-      console.warn("No saved config found, using defaults");
+      console.warn("Settings sync: using local defaults (Cloud unreachable)");
     }
   };
 
   /**
-   * Saves system configuration to storage and updates local state
+   * Saves configuration to both browser and cloud
    */
   const saveConfig = async (config) => {
+    // 1. Instant local persistence
     setN8nConfig(config);
+    localStorage.setItem("n8n-config", JSON.stringify(config));
     if (window.storage) {
       await window.storage.set("n8n-config", JSON.stringify(config));
+    }
+
+    // 2. Cloud persistence
+    if (config.webhookUrl) {
+      try {
+        const finalUrl = getWebhookUrl(config.webhookUrl);
+        const response = await fetch(finalUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            action: "update_config", 
+            config,
+            timestamp: new Date().toISOString() 
+          }),
+        });
+        
+        if (!response.ok) throw new Error("Cloud rejected the save request");
+      } catch (error) {
+        console.error("Cloud Save Error:", error);
+        throw error;
+      }
     }
   };
 

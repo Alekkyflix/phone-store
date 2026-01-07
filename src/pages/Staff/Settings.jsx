@@ -30,10 +30,13 @@ const Settings = ({ n8nConfig, saveConfig }) => {
       await saveConfig(localConfig);
       setSaveStatus({
         type: "success",
-        message: "✅ Settings saved successfully!",
+        message: "✅ Settings committed and synced to cloud!",
       });
     } catch (error) {
-      setSaveStatus({ type: "error", message: `Error: ${error.message}` });
+      setSaveStatus({ 
+        type: "error", 
+        message: `🔄 Local save worked, but Cloud Sync failed: ${error.message}. Ensure your n8n workflow handles the 'update_config' action.` 
+      });
     } finally {
       setIsSaving(false);
     }
