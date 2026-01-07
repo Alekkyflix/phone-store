@@ -298,6 +298,54 @@ const LandingPage = ({
                              </div>
                            </div>
 
+                           <div className="space-y-4">
+                             <label className="premium-label text-slate-900">Select Payment Method</label>
+                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => setPaymentMethod('mpesa')}
+                                  className={`flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all ${paymentMethod === 'mpesa' ? 'border-blue-600 bg-blue-50/50 shadow-lg shadow-blue-100' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+                                >
+                                  <div className={`p-2 rounded-xl ${paymentMethod === 'mpesa' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                    <Smartphone size={24} />
+                                  </div>
+                                  <div className="text-center">
+                                    <p className={`font-black text-xs ${paymentMethod === 'mpesa' ? 'text-blue-900' : 'text-slate-600'}`}>M-PESA</p>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Instant</p>
+                                  </div>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-slate-100 bg-slate-50/50 cursor-not-allowed opacity-60 relative group"
+                                >
+                                  <div className="absolute top-2 right-2 bg-slate-900 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter">Soon</div>
+                                  <div className="p-2 rounded-xl bg-slate-200 text-slate-400">
+                                    <CreditCard size={24} />
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="font-black text-xs text-slate-400">CARD</p>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Encrypted</p>
+                                  </div>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setPaymentMethod('cash')}
+                                  className={`flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all ${paymentMethod === 'cash' ? 'border-blue-600 bg-blue-50/50 shadow-lg shadow-blue-100' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+                                >
+                                  <div className={`p-2 rounded-xl ${paymentMethod === 'cash' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                    <Banknote size={24} />
+                                  </div>
+                                  <div className="text-center">
+                                    <p className={`font-black text-xs ${paymentMethod === 'cash' ? 'text-blue-900' : 'text-slate-600'}`}>CASH</p>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">On Pickup</p>
+                                  </div>
+                                </button>
+                             </div>
+                             <input type="hidden" name="paymentMethod" value={paymentMethod} />
+                           </div>
+
                            <div className="flex items-center gap-4 px-4 py-3 bg-slate-50/50 rounded-2xl border border-slate-100 border-dashed">
                              <input 
                                type="checkbox" 
