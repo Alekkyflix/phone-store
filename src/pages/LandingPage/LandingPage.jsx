@@ -14,7 +14,10 @@ import {
   Loader2,
   User,
   Mail,
-  RefreshCw
+  RefreshCw,
+  CreditCard,
+  Wallet,
+  Banknote
 } from 'lucide-react';
 import { MOCK_PHONES } from '../../mockData';
 import SmartphoneIcon from '../../components/common/SmartphoneIcon';
@@ -46,6 +49,7 @@ const LandingPage = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedPhone, setSelectedPhone] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('mpesa');
   const [orderStatus, setOrderStatus] = useState('idle'); // idle, ordering, success
   const [errorStatus, setErrorStatus] = useState({ show: false, message: '' });
 
