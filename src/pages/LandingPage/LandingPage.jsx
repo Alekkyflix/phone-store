@@ -14,9 +14,7 @@ import {
   Loader2,
   User,
   Mail,
-  RefreshCw,
-  Flame,
-  Award
+  RefreshCw
 } from 'lucide-react';
 import { MOCK_PHONES } from '../../mockData';
 import SmartphoneIcon from '../../components/common/SmartphoneIcon';
