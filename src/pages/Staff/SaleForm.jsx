@@ -62,7 +62,8 @@ const SaleForm = ({ n8nConfig }) => {
 
     try {
       const saleData = {
-        action: "new_sale",
+        action: "order_submitted",
+        source: "staff",
         timestamp: new Date().toISOString(),
         sale: {
           ...formData,

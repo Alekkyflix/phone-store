@@ -77,7 +77,8 @@ const LandingPage = ({
     try {
       console.log('Initiating checkout with URL:', n8nConfig.webhookUrl);
       const payload = {
-        action: 'customer_order',
+        action: 'order_submitted',
+        source: 'customer',
         timestamp: new Date().toISOString(),
         phone: selectedPhone, // Single phone order context
         cartItems: cartItems.length > 0 ? cartItems : undefined,
