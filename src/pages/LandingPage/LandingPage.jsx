@@ -35,7 +35,8 @@ const LandingPage = ({
   setCurrentView,
   showConfetti,
   showCart,
-  setShowCart
+  setShowCart,
+  liveInventory = []
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -45,8 +46,11 @@ const LandingPage = ({
 
   const categories = ['All', 'Flagship', 'Mid-range', 'Budget', 'Used'];
 
+  // Determine which items to show: Live inventory first, fallback to mock
+  const itemsToDisplay = liveInventory.length > 0 ? liveInventory : MOCK_PHONES;
+
   // Filter logic for the phone grid
-  const filteredPhones = MOCK_PHONES.filter(phone => {
+  const filteredPhones = itemsToDisplay.filter(phone => {
     const matchesSearch = phone.model.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          phone.brand.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || phone.category === selectedCategory;
@@ -82,7 +86,9 @@ const LandingPage = ({
         timestamp: new Date().toISOString(),
         phone: selectedPhone, // Single phone order context
         cartItems: cartItems.length > 0 ? cartItems : undefined,
-        customer: customerData
+        customer: customerData,
+        email: customerData.email,
+        subscribeToOffers: customerData.subscribeToOffers === 'on' || customerData.subscribeToOffers === true
       };
       
       console.log('Order payload:', payload);
@@ -238,7 +244,7 @@ const LandingPage = ({
                         }} className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                              <input name="name" required placeholder="Full Name" className="bg-white/80 border-white/50 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 font-bold" />
-                              <div className="space-y-1">
+                               <div className="space-y-1">
                                 <input 
                                   name="customerPhone" 
                                   required 
@@ -249,7 +255,28 @@ const LandingPage = ({
                                 />
                                 <p className="text-[9px] text-blue-600 font-bold uppercase ml-1">Must include country code starting with +</p>
                               </div>
-                          </div>
+                           </div>
+                           <div className="space-y-2">
+                             <input 
+                               name="email" 
+                               type="email" 
+                               required 
+                               placeholder="Email Address" 
+                               className="w-full bg-white/80 border-white/50 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 font-bold" 
+                             />
+                           </div>
+                           <div className="flex items-center gap-3 px-2 py-1">
+                             <input 
+                               type="checkbox" 
+                               id="subscribeToOffers" 
+                               name="subscribeToOffers" 
+                               defaultChecked
+                               className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+                             />
+                             <label htmlFor="subscribeToOffers" className="text-xs font-bold text-slate-600 cursor-pointer">
+                               Send me tech updates, offers and order confirmations via email
+                             </label>
+                           </div>
                           <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
                              <Zap size={20} className="fill-white" /> Complete Checkout
                           </button>

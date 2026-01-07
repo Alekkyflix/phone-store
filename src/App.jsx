@@ -52,6 +52,11 @@ const PhoneShopManager = () => {
   const [cartItems, setCartItems] = useState([]);
   const [showCart, setShowCart] = useState(false);
 
+  // Live Data State
+  const [inventory, setInventory] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // ===== INITIALIZATION LOGIC =====
 
   useEffect(() => {
@@ -59,6 +64,7 @@ const PhoneShopManager = () => {
       await loadConfig();
       await loadGamification();
       await checkAuthStatus();
+      await fetchInventory(); // Initial inventory load
     };
     initializeApp();
   }, []);
@@ -99,6 +105,59 @@ const PhoneShopManager = () => {
       }
     } catch (error) {
       console.warn("Settings sync: using local defaults (Cloud unreachable)");
+    }
+  };
+
+  /**
+   * Fetches the latest inventory from n8n/Google Sheets
+   */
+  const fetchInventory = async () => {
+    try {
+      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
+      if (!finalUrl) return;
+
+      const response = await fetch(finalUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "get_inventory", timestamp: new Date().toISOString() }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.success && data.inventory) {
+          setInventory(data.inventory);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch inventory:", error);
+    }
+  };
+
+  /**
+   * Fetches recent transaction history
+   */
+  const fetchHistory = async () => {
+    try {
+      setIsRefreshing(true);
+      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
+      if (!finalUrl) return;
+
+      const response = await fetch(finalUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "get_history", timestamp: new Date().toISOString() }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.success && data.history) {
+          setHistory(data.history);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch history:", error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -246,6 +305,7 @@ const PhoneShopManager = () => {
           showConfetti={showConfetti}
           showCart={showCart}
           setShowCart={setShowCart}
+          liveInventory={inventory}
         />
       )}
 
@@ -340,7 +400,15 @@ const PhoneShopManager = () => {
               {activeTab === "inventory" && <InventoryManager n8nConfig={n8nConfig} />}
               {activeTab === "offers" && <OfferBroadcast n8nConfig={n8nConfig} />}
               {activeTab === "customers" && <CustomersList n8nConfig={n8nConfig} />}
-              {activeTab === "settings" && <Settings n8nConfig={n8nConfig} saveConfig={saveConfig} />}
+              {activeTab === "settings" && (
+                <Settings 
+                  n8nConfig={n8nConfig} 
+                  saveConfig={saveConfig} 
+                  isRefreshing={isRefreshing}
+                  onRefresh={fetchHistory}
+                  history={history}
+                />
+              )}
             </div>
           </div>
         </div>

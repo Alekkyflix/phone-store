@@ -8,6 +8,7 @@ import {
   CheckCircle, 
   AlertCircle 
 } from "lucide-react";
+import { getWebhookUrl } from "../../utils/config";
 
 /**
  * InventoryManager Component
@@ -55,6 +56,7 @@ const InventoryManager = ({ n8nConfig }) => {
     try {
       const inventoryData = {
         action: "inventory_added",
+        source: "staff",
         actionType: actionType,
         timestamp: new Date().toISOString(),
         data: {
@@ -71,14 +73,18 @@ const InventoryManager = ({ n8nConfig }) => {
         },
       };
 
-      const response = await fetch(n8nConfig.webhookUrl, {
+      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
+
+      const response = await fetch(finalUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(inventoryData),
       });
 
       if (response.ok) {
-        const result = await response.json();
+        // Safe JSON parsing to avoid "Unexpected end of JSON input"
+        const text = await response.text();
+        const result = text ? JSON.parse(text) : {};
         let message = "";
 
         if (actionType === "add_stock") {
