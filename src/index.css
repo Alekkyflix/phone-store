@@ -84,6 +84,14 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-slate-200 rounded-full hover:bg-slate-300;
   }
+
+  .premium-input {
+    @apply w-full bg-white/40 backdrop-blur-sm border border-white/60 px-12 py-4 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 focus:outline-none placeholder:text-slate-400 font-bold transition-all shadow-inner;
+  }
+
+  .premium-label {
+    @apply text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2 mb-2 block;
+  }
 }
 
 body {

@@ -11,7 +11,9 @@ import {
   Search, 
   Star, 
   Plus, 
-  Loader2 
+  Loader2,
+  User,
+  Mail
 } from 'lucide-react';
 import { MOCK_PHONES } from '../../mockData';
 import SmartphoneIcon from '../../components/common/SmartphoneIcon';
@@ -241,31 +243,53 @@ const LandingPage = ({
                           e.preventDefault();
                           const formData = new FormData(e.target);
                           handleOrderSubmit(Object.fromEntries(formData));
-                        }} className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                             <input name="name" required placeholder="Full Name" className="bg-white/80 border-white/50 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 font-bold" />
-                               <div className="space-y-1">
-                                <input 
-                                  name="customerPhone" 
-                                  required 
-                                  placeholder="+254... (WhatsApp Number)" 
-                                  pattern="^\+.*"
-                                  title="Please include country code starting with +"
-                                  className="w-full bg-white/80 border-white/50 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 font-bold" 
-                                />
-                                <p className="text-[9px] text-blue-600 font-bold uppercase ml-1">Must include country code starting with +</p>
+                        }} className="space-y-6">
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                              <div className="space-y-1">
+                                <label className="premium-label">Full Name</label>
+                                <div className="relative group">
+                                  <User className="absolute left-4 top-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                  <input 
+                                    name="name" 
+                                    required 
+                                    placeholder="Enter your name" 
+                                    className="premium-input" 
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <label className="premium-label">WhatsApp Number</label>
+                                <div className="relative group">
+                                  <Phone className="absolute left-4 top-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                  <input 
+                                    name="customerPhone" 
+                                    required 
+                                    placeholder="+254..." 
+                                    pattern="^\+.*"
+                                    title="Please include country code starting with +"
+                                    className="premium-input" 
+                                  />
+                                </div>
+                                <p className="text-[8px] text-blue-600 font-black uppercase tracking-tighter ml-2 opacity-70">Include country code (+254...)</p>
                               </div>
                            </div>
-                           <div className="space-y-2">
-                             <input 
-                               name="email" 
-                               type="email" 
-                               required 
-                               placeholder="Email Address" 
-                               className="w-full bg-white/80 border-white/50 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder:text-slate-400 font-bold" 
-                             />
+
+                           <div className="space-y-1">
+                             <label className="premium-label">Email Address</label>
+                             <div className="relative group">
+                               <Mail className="absolute left-4 top-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                               <input 
+                                 name="email" 
+                                 type="email" 
+                                 required 
+                                 placeholder="your@email.com" 
+                                 className="premium-input" 
+                               />
+                             </div>
                            </div>
-                           <div className="flex items-center gap-3 px-2 py-1">
+
+                           <div className="flex items-center gap-4 px-4 py-3 bg-slate-50/50 rounded-2xl border border-slate-100 border-dashed">
                              <input 
                                type="checkbox" 
                                id="subscribeToOffers" 
@@ -273,8 +297,8 @@ const LandingPage = ({
                                defaultChecked
                                className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
                              />
-                             <label htmlFor="subscribeToOffers" className="text-xs font-bold text-slate-600 cursor-pointer">
-                               Send me tech updates, offers and order confirmations via email
+                             <label htmlFor="subscribeToOffers" className="text-xs font-bold text-slate-500 cursor-pointer select-none leading-relaxed">
+                               I want to receive tech updates, exclusive offers and order confirmations.
                              </label>
                            </div>
                           <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
