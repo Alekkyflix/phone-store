@@ -306,6 +306,8 @@ const PhoneShopManager = () => {
           showCart={showCart}
           setShowCart={setShowCart}
           liveInventory={inventory}
+          onRefresh={fetchInventory}
+          isRefreshing={isRefreshing}
         />
       )}
 

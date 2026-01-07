@@ -13,7 +13,10 @@ import {
   Plus, 
   Loader2,
   User,
-  Mail
+  Mail,
+  RefreshCw,
+  Flame,
+  Award
 } from 'lucide-react';
 import { MOCK_PHONES } from '../../mockData';
 import SmartphoneIcon from '../../components/common/SmartphoneIcon';
@@ -38,7 +41,9 @@ const LandingPage = ({
   showConfetti,
   showCart,
   setShowCart,
-  liveInventory = []
+  liveInventory = [],
+  onRefresh,
+  isRefreshing
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -371,6 +376,14 @@ const LandingPage = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              <button 
+                onClick={(e) => { e.preventDefault(); onRefresh(); }}
+                disabled={isRefreshing}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-100 rounded-lg transition-colors group"
+                title="Sync Inventory"
+              >
+                <RefreshCw size={18} className={`text-slate-400 group-hover:text-blue-600 transition-all ${isRefreshing ? 'animate-spin' : ''}`} />
+              </button>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 px-2">
               {categories.map(cat => (
@@ -407,6 +420,12 @@ const LandingPage = ({
               {phone.category === 'Flagship' && (
                 <div className="absolute top-4 left-4 z-10 bg-amber-400 text-amber-950 text-[10px] font-black px-2 py-1 rounded-md flex items-center gap-1">
                   <Star size={10} fill="currentColor" /> ELITE
+                </div>
+              )}
+              {/* NEW Badge for items added in the last 48 hours */}
+              {(phone.isNew || (phone.timestamp && (new Date() - new Date(phone.timestamp) < 48 * 60 * 60 * 1000))) && (
+                <div className={`absolute top-4 ${phone.category === 'Flagship' ? 'left-20' : 'left-4'} z-10 bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded-md flex items-center gap-1 shadow-lg shadow-blue-200`}>
+                  <Zap size={10} fill="currentColor" /> NEW
                 </div>
               )}
               <div className="aspect-square bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center group-hover:bg-blue-50 transition-colors relative">
