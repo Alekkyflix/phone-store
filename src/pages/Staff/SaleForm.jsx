@@ -6,6 +6,7 @@ import {
   AlertCircle 
 } from "lucide-react";
 import { getWebhookUrl } from "../../utils/config";
+import { insertSale, isSupabaseConfigured } from "../../utils/supabase";
 
 /**
  * SaleForm Component
@@ -38,26 +39,12 @@ const SaleForm = ({ n8nConfig }) => {
       !formData.amount ||
       !formData.salesPerson
     ) {
-      setStatus({
-        type: "error",
-        message: "Please fill in all required fields",
-      });
+      setStatus({ type: "error", message: "Please fill in all required fields" });
       return;
     }
 
     if (!formData.phoneNumber.startsWith('+')) {
-      setStatus({
-        type: "error",
-        message: "Phone number must start with country code (e.g., +254)",
-      });
-      return;
-    }
-
-    if (!n8nConfig.webhookUrl) {
-      setStatus({
-        type: "error",
-        message: "Please configure n8n webhook URL in Settings",
-      });
+      setStatus({ type: "error", message: "Phone number must start with country code (e.g., +254)" });
       return;
     }
 
@@ -65,55 +52,52 @@ const SaleForm = ({ n8nConfig }) => {
     setStatus({ type: "", message: "" });
 
     try {
-      const saleData = {
-        action: "order_submitted",
-        source: "staff",
-        timestamp: new Date().toISOString(),
-        sale: {
-          ...formData,
-          amount: parseFloat(formData.amount),
-        },
-        shop: {
-          name: n8nConfig.shopName,
-          location: n8nConfig.location,
-          inquiryNumber: n8nConfig.inquiryNumber,
-          whatsappGroup: n8nConfig.whatsappGroup,
-        },
-      };
+      // ── STEP 1: Write sale directly to Supabase ──
+      if (isSupabaseConfigured()) {
+        const dbResult = await insertSale({
+          phone_model:    formData.phoneBought,
+          phone_brand:    "",
+          price_sold:     parseFloat(formData.amount),
+          customer_name:  formData.customerName,
+          customer_phone: formData.phoneNumber,
+          payment_method: formData.paymentMode,
+          staff_note:     formData.salesPerson,
+        });
 
-      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
-      
-      const response = await fetch(finalUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(saleData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setStatus({
-          type: "success",
-          message: `✅ Sale recorded! ${
-            result.receiptNumber ? `Receipt #${result.receiptNumber}` : ""
-          }\n${
-            result.message ||
-            "Customer will receive WhatsApp message shortly.\nInventory automatically updated!"
-          }`,
-        });
-        setFormData({
-          customerName: "",
-          phoneNumber: "",
-          phoneBought: "",
-          amount: "",
-          paymentMode: "cash",
-          salesPerson: "",
-        });
-      } else {
-        setStatus({
-          type: "error",
-          message: "Failed to record sale. Please check your n8n webhook.",
-        });
+        if (!dbResult.success) {
+          setStatus({ type: "error", message: `Database error: ${dbResult.error}` });
+          return;
+        }
       }
+
+      // ── STEP 2: Fire existing n8n workflow for notifications (WhatsApp, Slack, etc.) ──
+      if (n8nConfig.webhookUrl) {
+        const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
+        fetch(finalUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "order_submitted",
+            source: "staff",
+            timestamp: new Date().toISOString(),
+            sale: { ...formData, amount: parseFloat(formData.amount) },
+            shop: {
+              name: n8nConfig.shopName,
+              location: n8nConfig.location,
+              inquiryNumber: n8nConfig.inquiryNumber,
+              whatsappGroup: n8nConfig.whatsappGroup,
+            },
+          }),
+        }).catch(() => {}); // fire-and-forget — don't block on notification failure
+      }
+
+      // ── STEP 3: Show success ──
+      setStatus({
+        type: "success",
+        message: `✅ Sale recorded!\nCustomer will receive WhatsApp confirmation shortly.\nInventory automatically updated!`,
+      });
+      setFormData({ customerName: "", phoneNumber: "", phoneBought: "", amount: "", paymentMode: "cash", salesPerson: "" });
+
     } catch (error) {
       setStatus({ type: "error", message: `Error: ${error.message}` });
     } finally {

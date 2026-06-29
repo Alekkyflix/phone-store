@@ -10,6 +10,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { getWebhookUrl } from "../../utils/config";
+import { adjustStock, insertPhone, isSupabaseConfigured } from "../../utils/supabase";
 
 /**
  * InventoryManager Component
@@ -40,7 +41,7 @@ const InventoryManager = ({ n8nConfig, onRefresh, isRefreshing }) => {
    * Supports 'add_stock', 'sale' (manual reduction), and 'new_product' registration.
    */
   const handleInventoryAction = async () => {
-    // Basic validation based on action type
+    // Validation
     if (actionType === "new_product") {
       if (!formData.model || !formData.brand || !formData.quantity || !formData.price) {
         setStatus({ type: "error", message: "Please fill in all fields for new product" });
@@ -48,82 +49,74 @@ const InventoryManager = ({ n8nConfig, onRefresh, isRefreshing }) => {
       }
     } else {
       if (!formData.productId || !formData.quantity) {
-        setStatus({ type: "error", message: "Please select product and enter quantity" });
+        setStatus({ type: "error", message: "Please enter a Product ID and quantity" });
         return;
       }
-    }
-
-    if (!n8nConfig.webhookUrl) {
-      setStatus({ type: "error", message: "Please configure n8n webhook URL in Settings" });
-      return;
     }
 
     setIsSubmitting(true);
     setStatus({ type: "", message: "" });
 
     try {
-      const inventoryData = {
-        action: "inventory_added",
-        source: "staff",
-        actionType: actionType,
-        timestamp: new Date().toISOString(),
-        data: {
-          productId: formData.productId || undefined,
-          brand: formData.brand || undefined,
-          model: formData.model || undefined,
-          quantity: parseInt(formData.quantity),
-          price: formData.price ? parseFloat(formData.price) : undefined,
-          minimumStock: formData.minimumStock ? parseInt(formData.minimumStock) : 5,
-        },
-        shop: {
-          name: n8nConfig.shopName,
-          location: n8nConfig.location,
-        },
+      let dbResult;
+
+      // ── STEP 1: Write directly to Supabase ──
+      if (isSupabaseConfigured()) {
+        const qty = parseInt(formData.quantity);
+
+        if (actionType === "new_product") {
+          dbResult = await insertPhone({
+            brand: formData.brand,
+            model: formData.model,
+            price: parseFloat(formData.price),
+            stock: qty,
+          });
+        } else {
+          // add_stock = positive delta, sale/reduce = negative delta
+          const delta = actionType === "add_stock" ? qty : -qty;
+          dbResult = await adjustStock(formData.productId, delta);
+        }
+
+        if (!dbResult.success) {
+          setStatus({ type: "error", message: `Database error: ${dbResult.error}` });
+          return;
+        }
+      }
+
+      // ── STEP 2: Notify existing n8n workflow (for WhatsApp/Slack alerts) ──
+      if (n8nConfig.webhookUrl) {
+        const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
+        fetch(finalUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "inventory_added",
+            source: "staff",
+            actionType,
+            timestamp: new Date().toISOString(),
+            data: {
+              productId: formData.productId || undefined,
+              brand: formData.brand || undefined,
+              model: formData.model || undefined,
+              quantity: parseInt(formData.quantity),
+              price: formData.price ? parseFloat(formData.price) : undefined,
+            },
+            shop: { name: n8nConfig.shopName, location: n8nConfig.location },
+          }),
+        }).catch(() => {}); // fire-and-forget — don't block on notification
+      }
+
+      // ── STEP 3: Show success ──
+      const messages = {
+        add_stock:   `✅ Stock updated! ${formData.quantity} units added to inventory.`,
+        sale:        `✅ Stock reduced! ${formData.quantity} units removed from inventory.`,
+        new_product: `✅ New device registered! ${formData.brand} ${formData.model} is now live.`,
       };
 
-      const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
+      setStatus({ type: "success", message: messages[actionType] });
+      if (onRefresh) onRefresh();
+      setFormData({ productId: "", model: "", brand: "", quantity: "", price: "", minimumStock: "5" });
 
-      const response = await fetch(finalUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(inventoryData),
-      });
-
-      if (response.ok) {
-        // Safe JSON parsing to avoid "Unexpected end of JSON input"
-        const text = await response.text();
-        const result = text ? JSON.parse(text) : {};
-        let message = "";
-
-        if (actionType === "add_stock") {
-          message = `✅ Stock added successfully!\n${result.message || `${formData.quantity} units added.`}`;
-        } else if (actionType === "sale") {
-          message = `✅ Stock reduced successfully!\n${result.message || `Units reduced by ${formData.quantity}.`}`;
-        } else {
-          message = `✅ New product added!\n${result.message || `${formData.brand} ${formData.model} registered.`}`;
-        }
-
-        if (result.lowStockAlert) {
-          message += `\n⚠️ LOW STOCK ALERT: Current level is below minimum!`;
-        }
-        
-        setStatus({ type: "success", message });
-        
-        // Auto-refresh the store inventory after successful addition
-        if (onRefresh) {
-          onRefresh();
-        }
-        setFormData({
-          productId: "",
-          model: "",
-          brand: "",
-          quantity: "",
-          price: "",
-          minimumStock: "5",
-        });
-      } else {
-        setStatus({ type: "error", message: "Failed to update inventory. Check your n8n webhook." });
-      }
     } catch (error) {
       setStatus({ type: "error", message: `Error: ${error.message}` });
     } finally {

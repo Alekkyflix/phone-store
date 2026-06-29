@@ -11,6 +11,7 @@ import {
 // Utility Imports
 import { DEFAULT_CONFIG, getWebhookUrl } from "./utils/config";
 import { hashPassword } from "./utils/crypto";
+import { fetchPhones, fetchRecentSales, isSupabaseConfigured } from "./utils/supabase";
 
 // Component Imports
 import SmartphoneIcon from "./components/common/SmartphoneIcon";
@@ -111,11 +112,22 @@ const PhoneShopManager = () => {
   };
 
   /**
-   * Fetches the latest inventory from n8n/Google Sheets.
-   * Updates the global inventory state used by both LandingPage and Staff Hub.
+   * Fetches the latest inventory.
+   * Priority: 1. Supabase (live DB)  2. n8n webhook (fallback)
+   * Updates the global inventory state used by LandingPage and Staff Hub.
    */
   const fetchInventory = async () => {
     try {
+      // 1. Try Supabase first (fastest, most reliable)
+      if (isSupabaseConfigured()) {
+        const phones = await fetchPhones();
+        if (phones.length > 0) {
+          setInventory(phones);
+          return;
+        }
+      }
+
+      // 2. Fallback: ask n8n for inventory
       const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
       if (!finalUrl) return;
 
@@ -140,12 +152,23 @@ const PhoneShopManager = () => {
   };
 
   /**
-   * Fetches recent transaction history for the Staff History tab.
-   * Provides transparency into sales and inventory movements.
+   * Fetches recent transaction history for the Staff Settings tab.
+   * Priority: 1. Supabase sales table  2. n8n webhook (fallback)
    */
   const fetchHistory = async () => {
     try {
       setIsRefreshing(true);
+
+      // 1. Try Supabase first
+      if (isSupabaseConfigured()) {
+        const sales = await fetchRecentSales(50);
+        if (sales.length > 0) {
+          setHistory(sales);
+          return;
+        }
+      }
+
+      // 2. Fallback: ask n8n
       const finalUrl = getWebhookUrl(n8nConfig.webhookUrl);
       if (!finalUrl) return;
 

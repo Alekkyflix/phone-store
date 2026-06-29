@@ -26,8 +26,10 @@ jobs:
 
       - name: Build
         env:
-          # This injects your secret into the build at compile time
+          # This injects your secrets into the build at compile time
           VITE_N8N_WEBHOOK_URL: ${{ secrets.VITE_N8N_WEBHOOK_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Deploy to GitHub Pages

@@ -1,0 +1,284 @@
+{
+  "name": "Phone Store — Main Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "phone-store",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-480, 0],
+      "id": "node-webhook",
+      "name": "Store Webhook",
+      "webhookId": "phone-store-main"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            { "conditions": { "conditions": [{ "leftValue": "={{ $json.body.action }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "get_inventory" }], "combinator": "and" }, "renameOutput": true, "outputKey": "get_inventory" },
+            { "conditions": { "conditions": [{ "leftValue": "={{ $json.body.action }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "order_submitted" }], "combinator": "and" }, "renameOutput": true, "outputKey": "order_submitted" },
+            { "conditions": { "conditions": [{ "leftValue": "={{ $json.body.action }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "inventory_added" }], "combinator": "and" }, "renameOutput": true, "outputKey": "inventory_added" },
+            { "conditions": { "conditions": [{ "leftValue": "={{ $json.body.action }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "get_config" }], "combinator": "and" }, "renameOutput": true, "outputKey": "get_config" },
+            { "conditions": { "conditions": [{ "leftValue": "={{ $json.body.action }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "update_config" }], "combinator": "and" }, "renameOutput": true, "outputKey": "update_config" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-240, 0],
+      "id": "node-switch",
+      "name": "Route by Action"
+    },
+
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/phones",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "select", "value": "id,brand,model,price,category,stock,rating,features,image_url" },
+            { "name": "stock", "value": "gt.0" },
+            { "name": "order", "value": "category.asc,brand.asc" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, -400],
+      "id": "node-get-inventory",
+      "name": "GET Phones from Supabase"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"inventory\": {{ JSON.stringify($json) }}\n}",
+        "options": { "responseCode": 200 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [240, -400],
+      "id": "node-respond-inventory",
+      "name": "Respond — Inventory"
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/sales",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone_model\": \"{{ $json.body.sale ? $json.body.sale.phoneBought : ($json.body.cartItems ? $json.body.cartItems[0].model : '') }}\",\n  \"phone_brand\": \"{{ $json.body.sale ? '' : ($json.body.cartItems ? $json.body.cartItems[0].brand : '') }}\",\n  \"price_sold\": {{ $json.body.sale ? $json.body.sale.amount : ($json.body.cartItems ? $json.body.cartItems[0].price : 0) }},\n  \"customer_name\": \"{{ $json.body.sale ? $json.body.sale.customerName : ($json.body.customer ? $json.body.customer.customerName : '') }}\",\n  \"customer_phone\": \"{{ $json.body.sale ? $json.body.sale.phoneNumber : ($json.body.customer ? $json.body.customer.customerPhone : '') }}\",\n  \"payment_method\": \"{{ $json.body.sale ? $json.body.sale.paymentMode : ($json.body.customer ? $json.body.customer.paymentMethod : 'mpesa') }}\",\n  \"staff_note\": \"{{ $json.body.sale ? $json.body.sale.salesPerson : ($json.body.source === 'customer' ? 'Online order' : '') }}\"\n}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Prefer", "value": "return=representation" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, -200],
+      "id": "node-insert-sale",
+      "name": "INSERT Sale to Supabase"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/decrement_stock",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"p_model\": \"{{ $('Route by Action').item.json.body.sale ? $('Route by Action').item.json.body.sale.phoneBought : ($('Route by Action').item.json.body.cartItems ? $('Route by Action').item.json.body.cartItems[0].model : '') }}\",\n  \"p_qty\": 1\n}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, -200],
+      "id": "node-decrement-stock",
+      "name": "Decrement Stock"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"receiptNumber\": \"TM-{{ Math.random().toString(36).substring(2,8).toUpperCase() }}\",\n  \"message\": \"Sale recorded and inventory updated!\"\n}",
+        "options": { "responseCode": 200 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [480, -200],
+      "id": "node-respond-sale",
+      "name": "Respond — Sale Recorded"
+    },
+
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.data.actionType }}",
+              "operator": { "type": "string", "operation": "equals" },
+              "rightValue": "new_product"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [0, 100],
+      "id": "node-if-new-product",
+      "name": "New Product or Stock Update?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/phones",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"brand\": \"{{ $('Route by Action').item.json.body.data.brand }}\",\n  \"model\": \"{{ $('Route by Action').item.json.body.data.model }}\",\n  \"price\": {{ $('Route by Action').item.json.body.data.price }},\n  \"category\": \"Mid-range\",\n  \"stock\": {{ $('Route by Action').item.json.body.data.quantity }},\n  \"features\": []\n}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Prefer", "value": "return=representation" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 0],
+      "id": "node-insert-phone",
+      "name": "INSERT New Phone"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/adjust_stock",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"p_id\": {{ $('Route by Action').item.json.body.data.productId }},\n  \"p_delta\": {{ $('Route by Action').item.json.body.data.actionType === 'add_stock' ? $('Route by Action').item.json.body.data.quantity : -$('Route by Action').item.json.body.data.quantity }}\n}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 200],
+      "id": "node-adjust-stock",
+      "name": "Adjust Stock +/-"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"message\": \"Inventory updated in database!\" }",
+        "options": { "responseCode": 200 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [480, 100],
+      "id": "node-respond-inventory-update",
+      "name": "Respond — Inventory Updated"
+    },
+
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"config\": {\n    \"webhookUrl\": \"{{ $env.N8N_WEBHOOK_URL }}\",\n    \"shopName\": \"Tech Mobile Store\",\n    \"location\": \"Murang'a, Kenya\",\n    \"inquiryNumber\": \"+254712345678\",\n    \"whatsappGroup\": \"https://chat.whatsapp.com/your-group-link\",\n    \"orderFormUrl\": \"https://forms.google.com/your-form-link\"\n  }\n}",
+        "options": { "responseCode": 200 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [0, 400],
+      "id": "node-respond-get-config",
+      "name": "Respond — Get Config"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true }",
+        "options": { "responseCode": 200 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [0, 550],
+      "id": "node-respond-update-config",
+      "name": "Respond — Update Config"
+    }
+  ],
+
+  "connections": {
+    "Store Webhook": {
+      "main": [[{ "node": "Route by Action", "type": "main", "index": 0 }]]
+    },
+    "Route by Action": {
+      "main": [
+        [{ "node": "GET Phones from Supabase", "type": "main", "index": 0 }],
+        [{ "node": "INSERT Sale to Supabase",  "type": "main", "index": 0 }],
+        [{ "node": "New Product or Stock Update?", "type": "main", "index": 0 }],
+        [{ "node": "Respond — Get Config",     "type": "main", "index": 0 }],
+        [{ "node": "Respond — Update Config",  "type": "main", "index": 0 }]
+      ]
+    },
+    "GET Phones from Supabase": {
+      "main": [[{ "node": "Respond — Inventory", "type": "main", "index": 0 }]]
+    },
+    "INSERT Sale to Supabase": {
+      "main": [[{ "node": "Decrement Stock", "type": "main", "index": 0 }]]
+    },
+    "Decrement Stock": {
+      "main": [[{ "node": "Respond — Sale Recorded", "type": "main", "index": 0 }]]
+    },
+    "New Product or Stock Update?": {
+      "main": [
+        [{ "node": "INSERT New Phone", "type": "main", "index": 0 }],
+        [{ "node": "Adjust Stock +/-", "type": "main", "index": 0 }]
+      ]
+    },
+    "INSERT New Phone": {
+      "main": [[{ "node": "Respond — Inventory Updated", "type": "main", "index": 0 }]]
+    },
+    "Adjust Stock +/-": {
+      "main": [[{ "node": "Respond — Inventory Updated", "type": "main", "index": 0 }]]
+    }
+  },
+
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

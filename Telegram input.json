@@ -1,0 +1,463 @@
+{
+  "name": "Telegram input",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2f69749-2c70-4ed7-b4db-4d8545eafadc",
+              "name": "message.chat.first_name",
+              "value": "={{ $json.message.chat.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "1aee60b5-9b86-42c1-a3d4-2303d867e860",
+              "name": "message.chat.username",
+              "value": "={{ $json.message.chat.username }}",
+              "type": "string"
+            },
+            {
+              "id": "4f243d57-920e-4156-aac2-3aac2e1f676f",
+              "name": "message.text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0000-0000-0000-000000000001",
+              "name": "chat_id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        512
+      ],
+      "id": "d194339e-4ec0-4923-aa4a-e58bffcc4662",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/phones",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "brand,model,price,category,stock,features"
+            },
+            {
+              "name": "stock",
+              "value": "gt.0"
+            },
+            {
+              "name": "order",
+              "value": "category.asc,brand.asc"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        736
+      ],
+      "id": "a1b2c3d4-0000-0000-0000-000000000002",
+      "name": "Fetch Live Inventory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4-0000-0000-0000-000000000003",
+              "name": "inventory_text",
+              "value": "={{ $json.map(p => `${p.brand} ${p.model} | KES ${p.price.toLocaleString()} | Stock: ${p.stock} | ${p.category}`).join('\\n') }}",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0000-0000-0000-000000000004",
+              "name": "message_text",
+              "value": "={{ $('Edit Fields').item.json['message.text'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0000-0000-0000-000000000005",
+              "name": "customer_name",
+              "value": "={{ $('Edit Fields').item.json['message.chat.first_name'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        736
+      ],
+      "id": "a1b2c3d4-0000-0000-0000-000000000006",
+      "name": "Prepare Context"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Role: You are a professional, friendly Customer Assistant for Tech Mobile Store KE — a phone shop based in Murang'a, Kenya.\n\nCustomer Name: {{ $json.customer_name }}\nCustomer Message: \"{{ $json.message_text }}\"\n\n--- LIVE INVENTORY (as of right now) ---\n{{ $json.inventory_text }}\n--- END OF INVENTORY ---\n\nInstructions:\n1. Style: Keep responses concise (2-4 sentences). Use a warm, helpful tone. Use emojis sparingly.\n2. Stock questions: Use ONLY the live inventory above to answer. Never guess or make up stock levels or prices.\n3. If a phone is NOT in the inventory list, say it is currently out of stock or unavailable.\n4. Greetings: If the user says \"Hey\", \"Hello\", \"Hi\" etc., greet them by name and offer to help with phone enquiries.\n5. Price: Always quote prices in KES (Kenya Shillings).\n6. Shop link: When relevant (e.g. they want to browse or order), share the shop: https://alekkyflix.github.io/phone-store/\n7. Contact fallback: If you cannot answer something specific (warranty, repair, delivery), always give: \"For more details, reach us at Tel/WhatsApp: +254712345678\"\n8. Never make up facts, delivery times, or prices not in the inventory.\n9. You have memory of this user's previous messages in this conversation — use it for context.\n\nRespond naturally as a helpful shop assistant.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        672,
+        512
+      ],
+      "id": "89ffdefd-c271-427b-852d-5e8056f31af3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "groq/compound",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        688,
+        736
+      ],
+      "id": "00adb4d1-d1c6-4337-8b11-92af99c85258",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "3BhjimmEPswPMPaO",
+          "name": "Groq mumoh"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=phone_store_{{ $('Edit Fields').item.json.chat_id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        736
+      ],
+      "id": "e6b5e7c1-02c7-4d21-a950-a8839ebf958f",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e02da563-18f4-43ee-9036-c55ce4143386",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "=Tel",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        944,
+        512
+      ],
+      "id": "b22c9fe7-6122-4f99-b8ae-72c9512723c9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A2PNST54N",
+          "mode": "list",
+          "cachedResultName": "project-nairobi-hotel"
+        },
+        "text": "={{ $json.output }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1168,
+        320
+      ],
+      "id": "aa0074af-16ce-49c3-a726-0eb33cb26a23",
+      "name": "Send a message",
+      "webhookId": "9e749579-def0-4827-8826-9f739b31a820",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aQZKOrVUB7br1zga",
+          "name": "Slack account 18"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Edit Fields').item.json.chat_id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        512
+      ],
+      "id": "79a1e4ff-7eb4-480e-a86c-cd4c789330e8",
+      "name": "Send a text message1",
+      "webhookId": "4654ae4d-54b2-4127-9f09-928e986583e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "CHk2YWzL8ZtYGcsW",
+          "name": "Telegram account Flix"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Edit Fields').item.json.chat_id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        704
+      ],
+      "id": "c5083fa4-3e12-4eb8-9fb3-c5dcdbdf172d",
+      "name": "Send a text message",
+      "webhookId": "6d0f3e2d-fc07-487a-9ff3-a2de4720ce13",
+      "credentials": {
+        "telegramApi": {
+          "id": "CHk2YWzL8ZtYGcsW",
+          "name": "Telegram account Flix"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        512
+      ],
+      "id": "e052f1fe-3496-4b5b-a10f-285ad49015e8",
+      "name": "Telegram Trigger",
+      "webhookId": "0d2210f4-e6b5-41be-ad28-8db4282d926c",
+      "credentials": {
+        "telegramApi": {
+          "id": "CHk2YWzL8ZtYGcsW",
+          "name": "Telegram account Flix"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 916551245,
+          "message": {
+            "message_id": 66,
+            "from": {
+              "id": 6662777079,
+              "is_bot": false,
+              "first_name": "~Flix 𓆩♡𓆪",
+              "username": "Alekky_Flix",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 6662777079,
+              "first_name": "~Flix 𓆩♡𓆪",
+              "username": "Alekky_Flix",
+              "type": "private"
+            },
+            "date": 1782714559,
+            "text": "do you have the samsung s26"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Fetch Live Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Live Inventory": {
+      "main": [
+        [
+          {
+            "node": "Prepare Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Context": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "any",
+    "availableInMCP": false,
+    "errorWorkflow": "F8zl7NFQjQshnwIP",
+    "timeSavedPerExecution": 2
+  },
+  "versionId": "b330aea6-032f-4f5f-bb13-846a97a4a307",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad522d3f8bb6f25b2c056e1ca82a87b3d27f34f51f1e0539bd85ff16c3cb0fca"
+  },
+  "nodeGroups": [],
+  "id": "xycnUetdvH9SZzd4",
+  "tags": []
+}

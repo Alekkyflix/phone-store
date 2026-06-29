@@ -222,7 +222,7 @@ const LandingPage = ({
               Try Again
             </button>
             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
-              Error Hash: {Math.random().toString(36).substring(7).toUpperCase()}
+              Go to: Staff Portal → Settings → Webhook URL
             </p>
           </div>
         </div>

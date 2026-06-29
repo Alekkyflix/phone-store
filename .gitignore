@@ -1,34 +1,69 @@
-# Logs
-logs
-*.log
+# ============================================================
+# Phone Management System — .gitignore
+# ============================================================
+
+# ── Node / npm ───────────────────────────────────────────────
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+logs/
+*.log
 
-node_modules
-dist
-dist-ssr
+# ── Build output ─────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+
+# ── Vite ─────────────────────────────────────────────────────
 *.local
+vite.config.js.timestamp-*
 
-# Editor directories and files
+# ── Environment variables (NEVER commit these) ────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+
+# ── Python virtual environment ───────────────────────────────
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+*.egg
+
+# ── Editor / OS ──────────────────────────────────────────────
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+Thumbs.db
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# ── Supabase ─────────────────────────────────────────────────
+# Keep the seed SQL (safe — no secrets), but ignore local Supabase dev files
+.supabase/
+supabase/.temp/
 
-# Vite
-# vite.config.js.timestamp-*
+# ── n8n workflow exports ──────────────────────────────────────
+# These contain your workflow logic but NOT credentials (safe to commit).
+# Uncomment the line below ONLY if you want to keep them private:
+# *.json
+
+# ── Misc ─────────────────────────────────────────────────────
+*.bak
+*.tmp
+coverage/
+.nyc_output/
