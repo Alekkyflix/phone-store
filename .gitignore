@@ -67,3 +67,9 @@ supabase/.temp/
 *.tmp
 coverage/
 .nyc_output/
+
+
+WHATSAPP_MPESA_GUIDE.md
+MPESA_WEBHOOK_GUIDE.md
+Whatsapp input workflow.json
+telegram input.json

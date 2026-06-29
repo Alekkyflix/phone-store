@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Tech Mobile Store KE</title>
+  <meta name="description" content="Privacy Policy for Tech Mobile Store KE WhatsApp ordering service and website." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.8;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      color: white;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    main {
+      max-width: 780px;
+      margin: 3rem auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1.25rem;
+      padding: 2.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.15rem;
+      background: #3b82f6;
+      border-radius: 2px;
+    }
+
+    p { color: #475569; margin-bottom: 0.75rem; }
+    ul { color: #475569; padding-left: 1.5rem; }
+    ul li { margin-bottom: 0.4rem; }
+
+    .last-updated {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-top: 3rem;
+    }
+
+    a { color: #3b82f6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .contact-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .contact-box p { margin: 0; color: #0369a1; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Privacy Policy</h1>
+    <p>Tech Mobile Store KE &mdash; Last updated: June 2025</p>
+  </header>
+
+  <main>
+
+    <div class="card">
+      <h2>Introduction</h2>
+      <p>
+        Tech Mobile Store KE ("we", "our", "us") operates a smartphone retail service accessible via
+        our website and WhatsApp messaging service. This Privacy Policy explains how we collect,
+        use, and protect information you provide when interacting with us.
+      </p>
+      <p>
+        By using our WhatsApp ordering service or visiting our website, you agree to the practices
+        described in this policy.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Information We Collect</h2>
+      <p>We collect the following information when you interact with us:</p>
+      <ul>
+        <li><strong>WhatsApp profile name</strong> — to personalise responses</li>
+        <li><strong>WhatsApp phone number</strong> — to process and confirm your order</li>
+        <li><strong>Order details</strong> — phone model requested, price, and payment method</li>
+        <li><strong>M-Pesa transaction reference</strong> — to confirm payment</li>
+        <li><strong>Messages sent to our WhatsApp bot</strong> — processed to respond to your enquiry</li>
+      </ul>
+      <p style="margin-top:0.75rem;">
+        We do <strong>not</strong> collect passwords, ID numbers, or financial account credentials.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>How We Use Your Information</h2>
+      <ul>
+        <li>To respond to product enquiries and provide pricing information</li>
+        <li>To process and confirm orders placed via WhatsApp</li>
+        <li>To initiate M-Pesa payment requests for purchases</li>
+        <li>To send order confirmations and receipts via WhatsApp</li>
+        <li>To maintain transaction records for our internal sales logs</li>
+        <li>To improve our service quality and response accuracy</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>WhatsApp Messaging</h2>
+      <p>
+        Our WhatsApp bot is powered by Meta's WhatsApp Cloud API. When you message us, your
+        messages are processed through Meta's infrastructure in accordance with
+        <a href="https://www.whatsapp.com/legal/privacy-policy" target="_blank" rel="noopener">
+          WhatsApp's Privacy Policy
+        </a>.
+        We use an automated AI assistant to handle initial enquiries; human staff review orders
+        before confirmation.
+      </p>
+      <p>
+        We will only send you WhatsApp messages related to your order or enquiry. We do not send
+        unsolicited marketing messages.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>M-Pesa Payments</h2>
+      <p>
+        Payment is processed via Safaricom's M-Pesa platform. We initiate an STK push to your
+        registered M-Pesa phone number. We do not store your M-Pesa PIN or any sensitive payment
+        credentials. Only the transaction reference number and amount are retained for record-keeping.
+      </p>
+      <p>
+        M-Pesa transactions are governed by
+        <a href="https://www.safaricom.co.ke/personal/m-pesa/m-pesa-resources/privacy-policy"
+           target="_blank" rel="noopener">Safaricom's Privacy Policy</a>.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Data Storage &amp; Retention</h2>
+      <p>
+        Order and transaction data is stored securely in a cloud database (Supabase / PostgreSQL)
+        hosted on servers within the European Union. We retain transaction records for up to
+        <strong>2 years</strong> for accounting and dispute resolution purposes.
+      </p>
+      <p>
+        WhatsApp conversation history is not stored permanently on our systems beyond what is
+        necessary to process your order.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Data Sharing</h2>
+      <p>We do <strong>not</strong> sell, rent, or share your personal information with third parties
+      except as required to operate our service:</p>
+      <ul>
+        <li><strong>Meta / WhatsApp</strong> — to deliver messages (subject to their own policy)</li>
+        <li><strong>Safaricom</strong> — to process M-Pesa payments</li>
+        <li><strong>n8n</strong> — our automation platform that routes messages and triggers payments</li>
+      </ul>
+      <p style="margin-top:0.75rem;">
+        We will disclose information to law enforcement only when legally required to do so.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Your Rights</h2>
+      <p>You have the right to:</p>
+      <ul>
+        <li>Request a copy of the personal data we hold about you</li>
+        <li>Request deletion of your personal data from our records</li>
+        <li>Opt out of receiving WhatsApp messages from us at any time by replying <strong>STOP</strong></li>
+        <li>Raise a complaint if you believe your data has been mishandled</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Contact Us</h2>
+      <p>For any questions or data requests, reach us at:</p>
+      <div class="contact-box">
+        <p>📞 <strong>Phone / WhatsApp:</strong> +254 712 345 678</p>
+        <p>📍 <strong>Location:</strong> Murang'a, Kenya</p>
+        <p>🌐 <strong>Website:</strong>
+          <a href="https://alekkyflix.github.io/phone-store/">
+            alekkyflix.github.io/phone-store
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Changes to This Policy</h2>
+      <p>
+        We may update this Privacy Policy from time to time. Changes will be posted on this page
+        with an updated date. Continued use of our service after changes constitutes acceptance of
+        the updated policy.
+      </p>
+    </div>
+
+    <p class="last-updated">
+      &copy; 2025 Tech Mobile Store KE &mdash; All rights reserved.
+    </p>
+
+  </main>
+
+</body>
+</html>
