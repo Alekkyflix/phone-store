@@ -267,6 +267,9 @@ const AuthPage = ({ mode, n8nConfig, setCurrentUser, setIsAuthenticated, setCurr
                     placeholder="+254712345678"
                     disabled={isSubmitting}
                   />
+                  <p className="text-[9px] text-white/40 font-bold mt-2 ml-1 italic leading-tight">
+                    * By requesting access, you acknowledge that staff activity (inventory changes/sales) is logged for security and auditing purposes in compliance with internal data regulations.
+                  </p>
                 </div>
               </>
             )}

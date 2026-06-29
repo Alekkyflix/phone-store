@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingCart, X, Trash2, Zap, User, Phone, Mail, Smartphone, CreditCard, Banknote, Loader2 } from 'lucide-react';
+import { getImagePath } from '../../utils/config';
 
 /**
  * CheckoutModal Component
@@ -18,6 +19,31 @@ import { ShoppingCart, X, Trash2, Zap, User, Phone, Mail, Smartphone, CreditCard
  * @param {string} props.paymentMethod - Currently selected payment method
  * @param {Function} props.setPaymentMethod - Updates the payment method
  */
+/**
+ * Helper component for cart item images to manage error state
+ */
+const CartItemImage = ({ item }) => {
+  const [error, setError] = React.useState(false);
+  const cartImageUrl = item.images && item.images.length > 0 ? getImagePath(item.images[0]) : null;
+
+  if (cartImageUrl && !error) {
+    return (
+      <img 
+        src={cartImageUrl} 
+        alt={item.model} 
+        className="w-full h-full object-contain p-2" 
+        onError={() => setError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center w-full h-full">
+      <Smartphone className="text-blue-600" size={24} />
+    </div>
+  );
+};
+
 const CheckoutModal = ({
   showCart,
   setShowCart,
@@ -96,8 +122,8 @@ const CheckoutModal = ({
                   ) : (
                     cartItems.map((item, idx) => (
                       <div key={`cart-${idx}`} className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm animate-in slide-in-from-right duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
-                        <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">
-                          <Smartphone className="text-blue-600" size={24} />
+                        <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                          <CartItemImage item={item} />
                         </div>
                         <div className="flex-1">
                           <h5 className="font-black text-slate-900">{item.model}</h5>
@@ -153,10 +179,12 @@ const CheckoutModal = ({
                        </div>
 
                        <div className="space-y-2">
-                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+                            Email Address <span className="text-[8px] opacity-50">(Optional)</span>
+                          </label>
                           <div className="relative group">
                              <Mail className="absolute left-4 top-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-                             <input name="email" type="email" required placeholder="john@example.com" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold" />
+                             <input name="email" type="email" placeholder="john@example.com" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold" />
                           </div>
                        </div>
 
@@ -191,9 +219,21 @@ const CheckoutModal = ({
                           <input type="hidden" name="paymentMethod" value={paymentMethod} />
                        </div>
 
-                       <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                          <input type="checkbox" name="subscribeToOffers" id="sub" defaultChecked className="w-4 h-4 rounded text-blue-600" />
-                          <label htmlFor="sub" className="text-[10px] font-bold text-slate-500 leading-tight">I want to receive tech updates and exclusive member-only offers.</label>
+                       <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <input type="checkbox" name="subscribeToOffers" id="sub" className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
+                            <label htmlFor="sub" className="text-[10px] font-bold text-slate-500 leading-tight">
+                              I want to receive tech updates and exclusive member-only offers.
+                            </label>
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                          <p className="text-[9px] font-medium text-blue-600/80 leading-relaxed italic">
+                            <b>Privacy Notice:</b> Your data is securely processed via n8n and Google Cloud to fulfill your order. 
+                            We only use your WhatsApp number to contact you about this specific purchase. 
+                            By clicking confirm, you agree to our processing of your information.
+                          </p>
+                        </div>
                        </div>
 
                        <div className="space-y-4 pt-4">

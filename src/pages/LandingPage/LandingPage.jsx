@@ -8,6 +8,7 @@ import ShopHero from '../../components/shop/ShopHero';
 import ProductGrid from '../../components/shop/ProductGrid';
 import CheckoutModal from '../../components/shop/CheckoutModal';
 import QuickViewModal from '../../components/shop/QuickViewModal';
+import PrivacyPolicy from '../Legal/PrivacyPolicy';
 
 /**
  * LandingPage Component
@@ -55,6 +56,7 @@ const LandingPage = ({
   const [paymentMethod, setPaymentMethod] = useState('mpesa');
   const [orderStatus, setOrderStatus] = useState('idle'); // idle, ordering, success
   const [errorStatus, setErrorStatus] = useState({ show: false, message: '' });
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const categories = ['All', 'Flagship', 'Mid-range', 'Budget', 'Used'];
 
@@ -178,6 +180,27 @@ const LandingPage = ({
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
       />
+
+      {showPrivacy && (
+        <PrivacyPolicy onClose={() => setShowPrivacy(false)} />
+      )}
+
+      {/* 5. Footer */}
+      <footer className="py-12 border-t border-slate-100 bg-white/50">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-black text-xs">P</span>
+            </div>
+            <p className="font-black text-slate-900 tracking-tight">{n8nConfig.shopName}</p>
+          </div>
+          <div className="flex gap-8">
+            <button onClick={() => setShowPrivacy(true)} className="text-xs font-black text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-colors">Privacy Policy</button>
+            <button onClick={() => setCurrentView('auth')} className="text-xs font-black text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-colors">Staff Login</button>
+          </div>
+          <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em]">&copy; {new Date().getFullYear()} Secure Data Compliance</p>
+        </div>
+      </footer>
 
       {/* 5. Error Handler Overlay */}
       {errorStatus.show && (

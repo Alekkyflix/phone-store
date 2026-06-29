@@ -1,0 +1,22 @@
+# ============================================================
+# Phone Management System - Python Requirements
+# ============================================================
+# Install with: pip install -r requirements.txt
+#
+# NOTE: This project's primary stack is Node.js / React.
+#       Node dependencies are managed via package.json.
+#       This file covers Python-based tooling and scripts.
+# ============================================================
+
+# HTTP & API utilities
+requests>=2.31.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Data handling / reporting scripts
+pandas>=2.1.0
+openpyxl>=3.1.2       # Excel export support for pandas
+
+# Webhook / automation helpers
+flask>=3.0.0          # Lightweight server for local webhook testing

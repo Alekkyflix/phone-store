@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, ShoppingCart, Zap, Star } from 'lucide-react';
 import SmartphoneIcon from '../common/SmartphoneIcon';
+import { getImagePath } from '../../utils/config';
 
 /**
  * QuickViewModal Component
@@ -15,7 +16,11 @@ import SmartphoneIcon from '../common/SmartphoneIcon';
  * @param {Function} props.setShowCart - Toggles the cart visibility
  */
 const QuickViewModal = ({ phone, onClose, addToCart, setShowCart }) => {
+  const [imageError, setImageError] = React.useState(false);
   if (!phone) return null;
+
+  // Image path logic
+  const imageUrl = phone.images && phone.images.length > 0 ? getImagePath(phone.images[0]) : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
@@ -29,8 +34,19 @@ const QuickViewModal = ({ phone, onClose, addToCart, setShowCart }) => {
           >
             <X size={20} />
           </button>
-          <div className="w-full aspect-square bg-white rounded-[3rem] flex items-center justify-center shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
-            <SmartphoneIcon brand={phone.brand} size={120} />
+          <div className="w-full aspect-square bg-white rounded-[3rem] flex items-center justify-center shadow-xl transform rotate-3 hover:rotate-0 transition-all duration-500 p-8">
+            {imageUrl && !imageError ? (
+              <img 
+                src={imageUrl} 
+                alt={phone.model} 
+                className="max-w-full max-h-full object-contain drop-shadow-2xl" 
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="flex items-center justify-center">
+                <SmartphoneIcon brand={phone.brand} size={120} />
+              </div>
+            )}
           </div>
         </div>
 

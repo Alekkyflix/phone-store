@@ -96,15 +96,17 @@ const PhoneShopManager = () => {
 
         if (response.ok) {
           const cloudConfig = await response.json();
-          // We expect { success: true, config: { ... } }
           if (cloudConfig && cloudConfig.success && cloudConfig.config) {
             setN8nConfig(cloudConfig.config);
             localStorage.setItem("n8n-config", JSON.stringify(cloudConfig.config));
           }
+        } else {
+          const errorData = await response.text();
+          console.error(`Settings sync failed with status ${response.status}:`, errorData);
         }
       }
     } catch (error) {
-      console.warn("Settings sync: using local defaults (Cloud unreachable)");
+      console.warn("Settings sync: using local defaults (Cloud unreachable)", error);
     }
   };
 
@@ -128,9 +130,12 @@ const PhoneShopManager = () => {
         if (data && data.success && data.inventory) {
           setInventory(data.inventory);
         }
+      } else {
+        const errorData = await response.text();
+        console.error(`Inventory fetch failed with status ${response.status}:`, errorData);
       }
     } catch (error) {
-      // Silently fail to fallback to mock data
+      console.error("Inventory fetch error:", error);
     }
   };
 

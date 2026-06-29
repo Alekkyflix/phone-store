@@ -1,6 +1,8 @@
 import React from 'react';
 import { Star, Flame, Zap, Plus, ShoppingCart } from 'lucide-react';
+// Component Imports
 import SmartphoneIcon from '../common/SmartphoneIcon';
+import { getImagePath } from '../../utils/config';
 
 /**
  * PhoneCard Component
@@ -14,8 +16,13 @@ import SmartphoneIcon from '../common/SmartphoneIcon';
  * @param {Function} props.addPoints - Function to award interaction points
  */
 const PhoneCard = ({ phone, addToCart, setSelectedPhone, addPoints }) => {
+  const [imageError, setImageError] = React.useState(false);
+  
   // Logic for NEW badge (added in last 48 hours)
   const isNewlyAdded = phone.isNew || (phone.timestamp && (new Date() - new Date(phone.timestamp) < 48 * 60 * 60 * 1000));
+  
+  // Image path logic
+  const imageUrl = phone.images && phone.images.length > 0 ? getImagePath(phone.images[0]) : null;
 
   return (
     <div 
@@ -29,9 +36,20 @@ const PhoneCard = ({ phone, addToCart, setSelectedPhone, addPoints }) => {
       )}
 
       {/* Product Image / Icon Container */}
-      <div className="relative aspect-square mb-6 bg-slate-50 rounded-[2rem] flex items-center justify-center overflow-hidden group-hover:bg-blue-50 transition-colors">
-        <div className="transform group-hover:scale-110 transition-transform duration-500">
-          <SmartphoneIcon brand={phone.brand} />
+      <div className="relative aspect-square mb-6 bg-slate-50 rounded-[2rem] flex items-center justify-center overflow-hidden group-hover:bg-blue-50 transition-colors p-4">
+        <div className="transform group-hover:scale-110 transition-transform duration-500 w-full h-full flex items-center justify-center">
+          {imageUrl && !imageError ? (
+            <img 
+              src={imageUrl} 
+              alt={phone.model} 
+              className="max-w-full max-h-full object-contain drop-shadow-2xl" 
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="flex items-center justify-center">
+              <SmartphoneIcon brand={phone.brand} />
+            </div>
+          )}
         </div>
         
         {/* Category Tag */}

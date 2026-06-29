@@ -75,12 +75,14 @@ const Settings = ({ n8nConfig, saveConfig, history = [], onRefresh, isRefreshing
           message: "🚀 Connectivity Verified! n8n responded correctly.",
         });
       } else {
-        throw new Error(`n8n responded with ${response.status}`);
+        const errorText = await response.text();
+        console.error(`n8n Error [${response.status}]:`, errorText);
+        throw new Error(`n8n responded with ${response.status}: ${errorText.substring(0, 50)}...`);
       }
     } catch (error) {
       setSaveStatus({ 
         type: "error", 
-        message: `🚫 Connection Failed. Please check two things in n8n:\n1. Your Webhook node Method must be 'POST'.\n2. In node 'Settings' -> 'Options', add 'CORS' and set it to '*'.` 
+        message: `🚫 Connection Failed: ${error.message}. Please check your n8n workflow logs.` 
       });
     } finally {
       setIsSaving(false);

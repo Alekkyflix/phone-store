@@ -12,6 +12,20 @@ export const DEFAULT_CONFIG = {
 };
 
 /**
+ * Utility to get the correct image path, handling the base URL.
+ * @param {string} path - The relative path to the image (e.g., 'images/iphone.png')
+ * @returns {string} - The full URL to the image
+ */
+export const getImagePath = (path) => {
+  if (!path) return "";
+  const base = import.meta.env.BASE_URL || "/";
+  // Remove leading slash from path and trailing slash from base
+  const cleanBase = base.endsWith("/") ? base : `${base}/`;
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  return `${cleanBase}${cleanPath}`;
+};
+
+/**
  * Utility to get the correct webhook URL based on the environment.
  * In development, it uses the local proxy (/api/n8n) to bypass CORS.
  * In production, it uses the direct URL.
