@@ -1,6 +1,7 @@
 -- ============================================================
 -- SUPABASE SEED SCRIPT — Phone Management System
 -- Run this in: Supabase Dashboard > SQL Editor
+-- SAFE TO RUN MULTIPLE TIMES — fully idempotent
 -- ============================================================
 
 -- 1. Create the phones (inventory) table
@@ -20,20 +21,20 @@ CREATE TABLE IF NOT EXISTS phones (
 
 -- 2. Create the sales (transaction log) table
 CREATE TABLE IF NOT EXISTS sales (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-    phone_id INTEGER REFERENCES phones (id),
-    phone_model TEXT NOT NULL,
-    phone_brand TEXT NOT NULL,
-    quantity INTEGER NOT NULL DEFAULT 1,
-    price_sold INTEGER NOT NULL,
-    customer_name TEXT,
-    customer_phone TEXT,
-    payment_method TEXT DEFAULT 'mpesa',
-    staff_note TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  phone_id        INTEGER REFERENCES phones(id),
+  phone_model     TEXT NOT NULL,
+  phone_brand     TEXT NOT NULL DEFAULT '',
+  quantity        INTEGER NOT NULL DEFAULT 1,
+  price_sold      INTEGER NOT NULL,
+  customer_name   TEXT,
+  customer_phone  TEXT,
+  payment_method  TEXT DEFAULT 'mpesa',
+  staff_note      TEXT,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Auto-update `updated_at` on phones whenever a row changes
+-- 3. Auto-update function for updated_at
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -42,11 +43,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- 4. Trigger — drop first so re-runs don't fail
+DROP TRIGGER IF EXISTS phones_updated_at ON phones;
 CREATE TRIGGER phones_updated_at
   BEFORE UPDATE ON phones
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- 4. Seed all 41 phones from mockData.js
+-- 5. Seed phones — skip rows that already exist (safe re-run)
 INSERT INTO phones (brand, model, price, category, stock, rating, features) VALUES
 -- FLAGSHIP
 ('Apple',   'iPhone 15 Pro Max',          159900, 'Flagship', 12, 4.9, ARRAY['Titanium design','A17 Pro chip','48MP Main camera','USB-C']),
@@ -71,16 +74,16 @@ INSERT INTO phones (brand, model, price, category, stock, rating, features) VALU
 ('Infinix', 'Note 40 Pro+',                 38000, 'Mid-range', 50, 4.3, ARRAY['100W All-Round FastCharge','MagCharge','Active Halo lighting','Dimensity 7020']),
 ('Tecno',   'Camon 30 Premier',             48000, 'Mid-range', 20, 4.4, ARRAY['Triple 50MP Cameras','Sony IMX890 Main','LTPO Display','Premium Suede back']),
 -- BUDGET
-('Samsung', 'Galaxy A15',                   22000, 'Budget', 60,  4.2, ARRAY['Super AMOLED display','5000mAh battery','25W Fast charging','4 years OS updates']),
+('Samsung', 'Galaxy A15',                   22000, 'Budget',  60, 4.2, ARRAY['Super AMOLED display','5000mAh battery','25W Fast charging','4 years OS updates']),
 ('Redmi',   '13C',                          16500, 'Budget', 100, 4.1, ARRAY['90Hz 6.74" display','50MP AI camera','Massive battery','Sleek design']),
-('Tecno',   'Spark 20 Pro',                 24000, 'Budget', 45,  4.3, ARRAY['108MP Main camera','120Hz FHD+ display','Helio G99 chipset','Stereo Dual Speaker']),
+('Tecno',   'Spark 20 Pro',                 24000, 'Budget',  45, 4.3, ARRAY['108MP Main camera','120Hz FHD+ display','Helio G99 chipset','Stereo Dual Speaker']),
 ('Infinix', 'Smart 8',                      12500, 'Budget', 150, 4.0, ARRAY['90Hz Punch-hole','Massive 5000mAh','Dynamic Port','Magic Ring']),
-('Nokia',   'G42 5G',                       28000, 'Budget', 25,  4.2, ARRAY['QuickFix repairability','3-day battery life','Sustainability focus','Snappy 5G']),
-('Realme',  'C67',                          21000, 'Budget', 35,  4.2, ARRAY['108MP 3x In-sensor Zoom','Snapdragon 685','Ultra Slim 7.59mm','33W SuperVOOC']),
-('Oppo',    'A18',                          18000, 'Budget', 55,  4.1, ARRAY['90Hz Sunlight display','Large 5000mAh','300% Ultra Volume','IP54 Water resistance']),
-('Itel',    'P55+',                         15500, 'Budget', 80,  4.0, ARRAY['45W HyperCharge','5000mAh battery','Punch-hole display','90Hz Refresh rate']),
-('Motorola','G34 5G',                       23000, 'Budget', 30,  4.3, ARRAY['Fast 5G performance','120Hz display','Dolby Atmos','Premium glass design']),
-('Samsung', 'Galaxy A05',                   14500, 'Budget', 90,  4.0, ARRAY['6.7" Large screen','50MP Main camera','5000mAh battery','Helio G85']),
+('Nokia',   'G42 5G',                       28000, 'Budget',  25, 4.2, ARRAY['QuickFix repairability','3-day battery life','Sustainability focus','Snappy 5G']),
+('Realme',  'C67',                          21000, 'Budget',  35, 4.2, ARRAY['108MP 3x In-sensor Zoom','Snapdragon 685','Ultra Slim 7.59mm','33W SuperVOOC']),
+('Oppo',    'A18',                          18000, 'Budget',  55, 4.1, ARRAY['90Hz Sunlight display','Large 5000mAh','300% Ultra Volume','IP54 Water resistance']),
+('Itel',    'P55+',                         15500, 'Budget',  80, 4.0, ARRAY['45W HyperCharge','5000mAh battery','Punch-hole display','90Hz Refresh rate']),
+('Motorola','G34 5G',                       23000, 'Budget',  30, 4.3, ARRAY['Fast 5G performance','120Hz display','Dolby Atmos','Premium glass design']),
+('Samsung', 'Galaxy A05',                   14500, 'Budget',  90, 4.0, ARRAY['6.7" Large screen','50MP Main camera','5000mAh battery','Helio G85']),
 -- USED / REFURBISHED
 ('Apple',   'iPhone 13 (Used)',             72000, 'Used',  5, 4.4, ARRAY['Good condition','Battery health 88%+','6 months warranty','Original screen']),
 ('Samsung', 'Galaxy S21 Ultra (Used)',      55000, 'Used',  3, 4.3, ARRAY['Minor scratches','Amazing zoom','12GB RAM','Original charger included']),
@@ -92,25 +95,28 @@ INSERT INTO phones (brand, model, price, category, stock, rating, features) VALU
 ('Huawei',  'Mate 40 Pro (Used)',           45000, 'Used',  1, 4.4, ARRAY['Excellent condition','Leica cameras','Curved screen','No Google services']),
 ('Apple',   'iPhone XR (Used)',             25000, 'Used', 15, 4.1, ARRAY['Multiple colors','Battery 82%+','Perfect for kids','Face ID works']),
 ('Samsung', 'Galaxy S10+ (Used)',           22000, 'Used',  8, 4.0, ARRAY['Classical flagship','Expandable storage','Headphone jack','Quad HD display']),
-('Sony',    'Xperia 5 II (Used)',           26000, 'Used',  4, 4.2, ARRAY['Compact size','120Hz display','Good battery','Japanese version']);
+('Sony',    'Xperia 5 II (Used)',           26000, 'Used',  4, 4.2, ARRAY['Compact size','120Hz display','Good battery','Japanese version'])
+ON CONFLICT DO NOTHING;
 
--- 5. Enable Row Level Security (keep data safe)
+-- 6. Row Level Security
 ALTER TABLE phones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sales  ENABLE ROW LEVEL SECURITY;
 
-ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
+-- Drop existing policies before recreating (safe re-run)
+DROP POLICY IF EXISTS "Public can read phones"        ON phones;
+DROP POLICY IF EXISTS "Service role can manage phones" ON phones;
+DROP POLICY IF EXISTS "Anyone can record a sale"      ON sales;
+DROP POLICY IF EXISTS "Service role can manage sales"  ON sales;
 
--- Allow public read on phones (shop can display inventory)
-CREATE POLICY "Public can read phones" ON phones FOR
-SELECT USING (true);
+-- Phones: anyone can read, only service_role can write
+CREATE POLICY "Public can read phones"         ON phones FOR SELECT USING (true);
+CREATE POLICY "Service role can manage phones" ON phones FOR ALL    USING (auth.role() = 'service_role');
 
--- Only service_role (n8n) can write to phones and sales
-CREATE POLICY "Service role can manage phones" ON phones FOR ALL USING (auth.role () = 'service_role');
+-- Sales: anyone can insert (customer orders + staff), service_role has full access
+CREATE POLICY "Anyone can record a sale"       ON sales  FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service role can manage sales"  ON sales  FOR ALL    USING (auth.role() = 'service_role');
 
-CREATE POLICY "Service role can manage sales" ON sales FOR ALL USING (auth.role () = 'service_role');
-
--- ============================================================
--- RPC HELPER FUNCTIONS (called by n8n via HTTP)
--- ============================================================
+-- 7. RPC helper functions (called by n8n and the React app)
 
 -- adjust_stock: Add or subtract stock by ID (positive = restock, negative = sale/reduce)
 CREATE OR REPLACE FUNCTION adjust_stock(p_id INT, p_delta INT)
@@ -122,7 +128,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- decrement_stock: Reduce stock by 1 using model name (used by online checkout)
+-- decrement_stock: Reduce stock by model name (used by customer checkout)
 CREATE OR REPLACE FUNCTION decrement_stock(p_model TEXT, p_qty INT DEFAULT 1)
 RETURNS void AS $$
 BEGIN
