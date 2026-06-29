@@ -11,9 +11,25 @@ jobs:
     permissions:
       contents: write  # Required for gh-pages to push
 
+    # Declare secrets as job-level env vars (suppresses linter warnings
+    # about "context access might be invalid" for user-defined secrets)
+    env:
+      VITE_N8N_WEBHOOK_URL: ${{ secrets.VITE_N8N_WEBHOOK_URL }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Check required secrets
+        run: |
+          if [ -z "$VITE_N8N_WEBHOOK_URL" ] || [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo " One or more required secrets are missing in GitHub Settings → Secrets."
+            echo "   Required: VITE_N8N_WEBHOOK_URL, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY"
+            exit 1
+          fi
+          echo "✅ All required secrets present."
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,11 +41,7 @@ jobs:
         run: npm install
 
       - name: Build
-        env:
-          # This injects your secrets into the build at compile time
-          VITE_N8N_WEBHOOK_URL: ${{ secrets.VITE_N8N_WEBHOOK_URL }}
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        # Env vars are inherited from the job-level env block above
         run: npm run build
 
       - name: Deploy to GitHub Pages
